@@ -60,7 +60,7 @@ Without automation, authors must manually track and update these symbols, which 
 ### Description
 
 * Works with standard LaTeX list environments: `itemize`, `enumerate`, and `description`;
-* * Each item ends with the command `\autopunct` (or its alias `\apt`);
+* Each item ends with the command `\autopunct` (or its alias `\apt`);
 * The package automatically inserts the correct punctuation:
 
   * *separator symbol* after non-final items (default: `;`);
