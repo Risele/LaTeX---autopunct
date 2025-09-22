@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[sep={;},end={.}]{autopunct} % можно менять символы
+
+\begin{document}
+	
+     \begin{itemize}
+	\item Point 1\autopunct
+	\item Point 2\autopunct
+	\item Last point\autopunct
+\end{itemize}
+
+
+\begin{enumerate}
+	\item One\autopunct
+	\item Two\autopunct
+	\item Last\autopunct
+\end{enumerate}
+
+
+\begin{itemize}
+	\item External 1\autopunct
+	\item External 2:\autopunct
+	\begin{enumerate}
+		\item Internal 1\autopunct
+		\item Internal 2\autopunct
+		\item Internal Last\autopunct
+	\end{enumerate}
+	\item External Last\autopunct
+\end{itemize}
+\end{document}

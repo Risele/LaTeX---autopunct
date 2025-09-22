@@ -1,0 +1,88 @@
+
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{autopunct}[2025/09/22 v1.0 Automatic punctuation in lists according to GOST/other: the last item ends with a period, the rest - with a semicolon.]
+%%%% 	 
+%%%%     
+%%%%     \begin{itemize}
+%%%%       \item Point 1\autopunct
+%%%%       \item Point 2\autopunct
+%%%%       \item Last point\autopunct
+%%%%     \end{itemize}
+%%%%     
+%%%%     
+%%%%     \begin{enumerate}
+%%%%       \item One\autopunct
+%%%%       \item Two\autopunct
+%%%%       \item Last\autopunct
+%%%%     \end{enumerate}
+%%%%     
+%%%%     
+%%%%     \begin{itemize}
+%%%%       \item External 1\autopunct
+%%%%       \item External 2:\autopunct
+%%%%         \begin{enumerate}
+%%%%           \item Internal 1\autopunct
+%%%%           \item Internal 2\autopunct
+%%%%           \item Internal Last\autopunct
+%%%%         \end{enumerate}
+%%%%       \item External Last\autopunct
+%%%%     \end{itemize}
+
+\RequirePackage{etoolbox}
+\RequirePackage{xkeyval}
+
+% === Options ===
+% default: ";" and "."
+\newcommand*\autopunct@sep{;}
+\newcommand*\autopunct@endmark{.}
+
+\DeclareOptionX{sep}{\renewcommand*\autopunct@sep{#1}}
+\DeclareOptionX{end}{\renewcommand*\autopunct@endmark{#1}}
+\ProcessOptionsX\relax
+
+\makeatletter
+% --- Flags ---
+\let\autopunct@none\relax
+\newcommand*\autopunct@wait{}   % expecting: ";" between items, "." at the end
+\newcommand*\autopunct@force{}  % forced "."
+
+% --- User commands ---
+\newcommand*\autopunct{\global\let\autopunct@pending\autopunct@wait}
+\newcommand*\autopunctforce{\global\let\autopunct@pending\autopunct@force}
+\newcommand*\apt{\autopunct} %Short alias
+% --- Init ---
+\AtBeginEnvironment{itemize}{\let\autopunct@pending\autopunct@none}
+\AtBeginEnvironment{enumerate}{\let\autopunct@pending\autopunct@none}
+\AtBeginEnvironment{description}{\let\autopunct@pending\autopunct@none}
+
+% --- Redefine \item ---
+\let\AP@origitem\item
+\def\item{%
+  \ifx\autopunct@pending\autopunct@wait
+    \ifhmode \unskip;\fi \par
+  \fi
+  \let\autopunct@pending\autopunct@none
+  \@ifnextchar[{ \AP@item@opt }{ \AP@item@no }%
+}
+\def\AP@item@no{\AP@origitem}
+\def\AP@item@opt[#1]{\AP@origitem[{#1}]}
+
+% --- End ---
+\newcommand*\autopunct@end{%
+  \begingroup
+    \ifx\autopunct@pending\autopunct@none
+      % ничего
+    \else
+      \ifx\autopunct@pending\autopunct@wait
+        \ifhmode \unskip\fi.\par
+      \else
+        \leavevmode \unskip.\par
+      \fi
+    \fi
+  \endgroup
+}
+\AtEndEnvironment{itemize}{\autopunct@end}
+\AtEndEnvironment{enumerate}{\autopunct@end}
+\AtEndEnvironment{description}{\autopunct@end}
+\makeatother
