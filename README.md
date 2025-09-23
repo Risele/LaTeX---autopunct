@@ -19,7 +19,6 @@ English below.
 ## Описание
 
 * Работает с базовыми окружениями списков LaTeX: `itemize`, `enumerate` и `description`;
-* Каждый пункт завершается командой `\autopunct` (или сокращённой `\apt`);
 * Пакет сам выбирает знак:
 
   * *разделитель* после непоследних пунктов (по умолчанию `;`);
@@ -61,7 +60,6 @@ Without automation, authors must manually track and update these symbols, which 
 ### Description
 
 * Works with standard LaTeX list environments: `itemize`, `enumerate`, and `description`;
-* Each item ends with the command `\autopunct` (or its alias `\apt`);
 * The package automatically inserts the correct punctuation:
 
   * *separator symbol* after non-final items (default: `;`);
