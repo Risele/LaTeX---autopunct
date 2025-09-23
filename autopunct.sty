@@ -1,7 +1,10 @@
-
-
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{autopunct}[2025/09/22 v1.0 Automatic punctuation in lists according to GOST/other: the last item ends with a period, the rest - with a semicolon.]
+% autopunct.sty --- Automatic punctuation in LaTeX lists
+% Author: (your name)
+% License: MIT
+% autopunct.sty --- Automatic punctuation in LaTeX lists
+% Author: (your name)
+% License: MIT
+\ProvidesPackage{autopunct}[2025/09/22 v1.1 Automatic punctuation in lists according to GOST/other: the last item ends with a period, the rest - with a semicolon.]
 %%%% 	 
 %%%%     
 %%%%     \begin{itemize}
@@ -32,8 +35,8 @@
 \RequirePackage{etoolbox}
 \RequirePackage{xkeyval}
 
-% === Options ===
-% default: ";" and "."
+% === Package options ===
+% Defaults: ; and .
 \newcommand*\autopunct@sep{;}
 \newcommand*\autopunct@endmark{.}
 
@@ -42,47 +45,91 @@
 \ProcessOptionsX\relax
 
 \makeatletter
-% --- Flags ---
+% --- Sentinels / flags ---
 \let\autopunct@none\relax
-\newcommand*\autopunct@wait{}   % expecting: ";" between items, "." at the end
-\newcommand*\autopunct@force{}  % forced "."
+\newcommand*\autopunct@wait{}   % waiting: separator between items
+\newcommand*\autopunct@force{}  % forced final mark
+\let\autopunct@initem\relax     % indicator: are we inside a real \item?
 
-% --- User commands ---
-\newcommand*\autopunct{\global\let\autopunct@pending\autopunct@wait}
-\newcommand*\autopunctforce{\global\let\autopunct@pending\autopunct@force}
-\newcommand*\apt{\autopunct} %Short alias
-% --- Init ---
-\AtBeginEnvironment{itemize}{\let\autopunct@pending\autopunct@none}
-\AtBeginEnvironment{enumerate}{\let\autopunct@pending\autopunct@none}
-\AtBeginEnvironment{description}{\let\autopunct@pending\autopunct@none}
+% --- Public user commands (LOCAL state per list level) ---
+\newcommand*\autopunct{%
+	\ifx\autopunct@initem\relax
+	% outside of \item -> ignore
+	\else
+	\let\autopunct@pending\autopunct@wait
+	\fi
+}
+\newcommand*\autopunctforce{%
+	\ifx\autopunct@initem\relax
+	% outside of \item -> ignore
+	\else
+	\let\autopunct@pending\autopunct@force
+	\fi
+}
+\newcommand*\apt{\autopunct} % short alias
 
-% --- Redefine \item ---
+% --- Initialization at the beginning of environments ---
+\AtBeginEnvironment{itemize}{%
+	\let\autopunct@pending\autopunct@none
+	\let\autopunct@initem\relax
+}
+\AtBeginEnvironment{enumerate}{%
+	\let\autopunct@pending\autopunct@none
+	\let\autopunct@initem\relax
+}
+\AtBeginEnvironment{description}{%
+	\let\autopunct@pending\autopunct@none
+	\let\autopunct@initem\relax
+}
+
+% --- Wrapper around \item with support for [optional argument] ---
 \let\AP@origitem\item
 \def\item{%
-  \ifx\autopunct@pending\autopunct@wait
-    \ifhmode \unskip;\fi \par
-  \fi
-  \let\autopunct@pending\autopunct@none
-  \@ifnextchar[{ \AP@item@opt }{ \AP@item@no }%
+	% If the previous item was marked -> close it with a separator (only in hmode)
+	\ifx\autopunct@pending\autopunct@wait
+	\ifhmode \unskip\autopunct@sep\par \fi
+	\fi
+	% Reset state before starting a new item
+	\let\autopunct@pending\autopunct@none
+	% Branch with/without optional argument
+	\@ifnextchar[{ \AP@item@opt }{ \AP@item@no }%
 }
-\def\AP@item@no{\AP@origitem}
-\def\AP@item@opt[#1]{\AP@origitem[{#1}]}
+\def\AP@item@no{%
+	\AP@origitem
+	\let\autopunct@initem\autopunct@wait
+}
+\def\AP@item@opt[#1]{%
+	\AP@origitem[{#1}]%
+	\let\autopunct@initem\autopunct@wait
+}
 
-% --- End ---
+% --- End of environment: place final punctuation if needed ---
 \newcommand*\autopunct@end{%
-  \begingroup
-    \ifx\autopunct@pending\autopunct@none
-      % ничего
-    \else
-      \ifx\autopunct@pending\autopunct@wait
-        \ifhmode \unskip\fi.\par
-      \else
-        \leavevmode \unskip.\par
-      \fi
-    \fi
-  \endgroup
+	\begingroup
+	% Only if there was at least one \item in this environment
+	\ifx\autopunct@initem\relax
+	% no items -> do nothing
+	\else
+	\ifx\autopunct@pending\autopunct@none
+	% last item not marked -> nothing
+	\else
+	\ifx\autopunct@pending\autopunct@wait
+	% normal case: add only in horizontal mode (prevents stray dot lines)
+	\ifhmode \unskip\autopunct@endmark\par \fi
+	\else
+	% forced case: always add, even in vertical mode
+	\leavevmode \unskip\autopunct@endmark\par
+	\fi
+	\fi
+	\fi
+	\endgroup
+	% Reset flags when leaving environment
+	\let\autopunct@pending\autopunct@none
+	\let\autopunct@initem\relax
 }
 \AtEndEnvironment{itemize}{\autopunct@end}
 \AtEndEnvironment{enumerate}{\autopunct@end}
 \AtEndEnvironment{description}{\autopunct@end}
 \makeatother
+
+
