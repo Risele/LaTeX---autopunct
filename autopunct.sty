@@ -22,10 +22,10 @@
 %%%%       \item External 1\autopunct
 %%%%       \item External 2:\autopunct
 %%%%         \begin{enumerate}
-%%%%           \item Internal 1\autopunct
-%%%%           \item Internal 2\autopunct
-%%%%           \item Internal Last\autopunct
-%%%%         \end{enumerate}
+	%%%%           \item Internal 1\autopunct
+	%%%%           \item Internal 2\autopunct
+	%%%%           \item Internal Last\autopunct
+	%%%%         \end{enumerate}
 %%%%       \item External Last\autopunct
 %%%%     \end{itemize}
 
@@ -92,14 +92,15 @@
 	\@ifnextchar[{ \AP@item@opt }{ \AP@item@no }%
 }
 \def\AP@item@no{%
-	\AP@origitem
-	\let\autopunct@initem\autopunct@wait
+  \AP@origitem
+  \let\autopunct@initem\autopunct@wait
+  \let\autopunct@pending\autopunct@wait % %% NEW: mark current item as "pending"
 }
 \def\AP@item@opt[#1]{%
-	\AP@origitem[{#1}]%
-	\let\autopunct@initem\autopunct@wait
+  \AP@origitem[{#1}]%
+  \let\autopunct@initem\autopunct@wait
+  \let\autopunct@pending\autopunct@wait % %% NEW: mark current item as "pending"
 }
-
 % --- End of environment: place final punctuation if needed ---
 \newcommand*\autopunct@end{%
 	\begingroup
@@ -128,6 +129,5 @@
 \AtEndEnvironment{enumerate}{\autopunct@end}
 \AtEndEnvironment{description}{\autopunct@end}
 \makeatother
-
 
 
