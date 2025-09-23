@@ -84,7 +84,7 @@
 \def\item{%
 	% If the previous item was marked -> close it with a separator (only in hmode)
 	\ifx\autopunct@pending\autopunct@wait
-	\ifhmode \unskip\autopunct@sep\par \fi
+	\ifhmode \unskip\unkern\unskip\autopunct@sep\par \fi
 	\fi
 	% Reset state before starting a new item
 	\let\autopunct@pending\autopunct@none
@@ -129,5 +129,6 @@
 \AtEndEnvironment{enumerate}{\autopunct@end}
 \AtEndEnvironment{description}{\autopunct@end}
 \makeatother
+
 
 
